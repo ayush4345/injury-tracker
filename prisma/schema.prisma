@@ -18,3 +18,31 @@ model Post {
 
     @@index([name])
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  image     String?
+  role      Role     @default(USER)
+  reports   Report[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Report {
+  id                  Int      @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  reporter            User     @relation(fields: [reporterEmail], references: [email])
+  reporterEmail       String
+  reporterName        String
+  date                String
+  time                String
+  imageUrl            String
+  category            String
+}
