@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
-
 import { Inter } from "next/font/google";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
+import Navbar from "~/components/navbar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <UserProvider>
-        <body className={`font-sans ${inter.variable}`}>{children}</body>
+        <body className={`font-sans ${inter.variable} bg-[#034144]`}>
+          <Navbar />
+          {children}
+        </body>
       </UserProvider>
     </html>
   );
