@@ -17,7 +17,7 @@ import { Textarea } from "~/components/ui/textarea";
 
 const Form = () => {
   const [Name, setName] = useState("");
-  const [date, setDate] = useState();
+  const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -128,11 +128,11 @@ const Form = () => {
       </form>
       <section className="flex gap-14">
         <div className=" flex flex-col items-center">
-          <BodyComponent onClick={(e: String) => showBodyPart("Front", e)} />
+          <BodyComponent onClick={(e: string) => showBodyPart("Front", e)} />
           <h3 className="font-semibold text-white">Front Body</h3>
         </div>
         <div className=" flex flex-col items-center">
-          <BodyComponent onClick={(e: String) => showBodyPart("Back", e)} />
+          <BodyComponent onClick={(e: string) => showBodyPart("Back", e)} />
           <h3 className="font-semibold text-white">Back Body</h3>
         </div>
       </section>
