@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { InputHTMLAttributes, useState } from "react";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -16,11 +16,11 @@ import { BodyComponent } from "reactjs-human-body";
 import { Textarea } from "~/components/ui/textarea";
 
 const Form = () => {
-  const [Name, setName] = useState<String>("");
+  const [Name, setName] = useState("");
   const [date, setDate] = useState();
-  const [time, setTime] = useState<String>("");
-  const [email, setEmail] = useState<String>("");
-  const [phone, setPhone] = useState<String>("");
+  const [time, setTime] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [injuredPart, setInjuredPart] = useState<String[]>([]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -111,7 +111,6 @@ const Form = () => {
                 {data}
               </label>
               <Textarea
-                type="tel"
                 id="phone"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
@@ -122,7 +121,7 @@ const Form = () => {
         })}
         <Button
           type="submit"
-          className="focus:shadow-outline rounded bg-white px-4 py-2 font-semibold text-[#00afaa] hover:bg-blue-700 focus:outline-none"
+          className="focus:shadow-outline rounded bg-white px-4 py-2 font-semibold text-[#00afaa] hover:bg-gray-300 focus:outline-none"
         >
           Submit
         </Button>
