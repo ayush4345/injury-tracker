@@ -2,13 +2,42 @@
 
 import Link from "next/link";
 import { FormNextLink } from "grommet-icons";
+import { gql, useQuery } from "@apollo/client";
 
 export default function HomePage() {
+  const AllLinksQuery = gql`
+    query allReportsQuery($first: Int, $after: ID) {
+      reports(first: $first, after: $after) {
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        edges {
+          cursor
+          node {
+            id
+            reporterName
+            data
+            time
+            reporterEmail
+            injury
+          }
+      }
+    }
+  `;
+
+  const { data, loading, error, fetchMore } = useQuery(AllLinksQuery);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Oh no... {error.message}</p>;
+
+  const { endCursor, hasNextPage } = data.reports.pageInfo;
+
   return (
     <main className="flex min-h-[90vh] flex-col items-center justify-center bg-[#034144] text-white">
       <div className="flex w-[80vw] items-center justify-center gap-12 rounded-2xl border-2 border-[#1e6164] p-3 px-6 ">
         <div className="flex flex-col gap-4 ">
-          <h1 className="font-['inter'] text-3xl mb-3 font-semibold text-white sm:text-[4rem]">
+          <h1 className="mb-3 font-['inter'] text-3xl font-semibold text-white sm:text-6xl">
             Injury Tracker
           </h1>
           <div className="text-lg font-semibold text-[#00afaa]">
@@ -19,7 +48,10 @@ export default function HomePage() {
             <br />
             Get acccess of report at ease
           </div>
-          <Link href="/report" className="flex w-40 gap-3 rounded-xl bg-white p-4 font-semibold text-[#034144] transition-all ease-in-out hover:gap-5">
+          <Link
+            href="/report"
+            className="flex w-44 gap-3 rounded-xl bg-white p-4 font-semibold text-[#034144] transition-all ease-in-out hover:gap-5"
+          >
             <span>Get Started</span>
             <FormNextLink />
           </Link>

@@ -128,11 +128,11 @@ const Form = () => {
       </form>
       <section className="flex gap-14">
         <div className=" flex flex-col items-center">
-          <BodyComponent onClick={(e: string) => showBodyPart("Front", e)} />
+          <BodyComponent onClick={(e: string) => showBodyPart("front", e)} />
           <h3 className="font-semibold text-white">Front Body</h3>
         </div>
         <div className=" flex flex-col items-center">
-          <BodyComponent onClick={(e: string) => showBodyPart("Back", e)} />
+          <BodyComponent onClick={(e: string) => showBodyPart("back", e)} />
           <h3 className="font-semibold text-white">Back Body</h3>
         </div>
       </section>

@@ -5,9 +5,13 @@ generator client {
     provider = "prisma-client-js"
 }
 
+generator pothos {
+  provider = "prisma-pothos-types"
+}
+
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
+    url      = env("MIGRATE_DATABASE_URL")
 }
 
 model Post {
@@ -43,6 +47,15 @@ model Report {
   reporterName        String
   date                String
   time                String
-  imageUrl            String
-  category            String
+  injury              Injury[]
+}
+
+model Injury {
+  id                  Int      @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  report              Report   @relation(fields: [reportId], references: [id])
+  reportId            Int
+  bodyPart            String
+  description         String
 }
