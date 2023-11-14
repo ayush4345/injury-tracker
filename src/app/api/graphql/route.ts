@@ -1,5 +1,4 @@
 import { createSchema, createYoga } from "graphql-yoga";
-import { resolvers } from "../../../../graphql/resolvers";
 import { createContext } from "../../../../graphql/context";
 import { schema } from "../../../../graphql/schema";
 
