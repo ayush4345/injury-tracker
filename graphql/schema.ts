@@ -3,7 +3,7 @@ import "./types/User";
 import "./types/Report";
 import "./types/Injury";
 
-export const schema = builder.toSchema()
+export const schema = builder.toSchema({})
 
 // export const typeDefs = `
 //   type Injury {

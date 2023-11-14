@@ -11,9 +11,40 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import { BodyComponent } from "reactjs-human-body";
 import { Textarea } from "~/components/ui/textarea";
+import toast, { Toaster } from "react-hot-toast";
+import { gql, useMutation } from "@apollo/client";
+import { useUser } from "@auth0/nextjs-auth0/client";
+
+type FormValues = {
+  reporterName: string;
+  reporterEmail: string;
+  date: string;
+  time: string;
+};
+
+const CreateReportMutation = gql`
+  mutation createReport(
+    $reporterName: String!
+    $reporterEmail: String!
+    $date: String!
+    $time: String!
+  ) {
+    createReport(
+      reporterName: $reporterName
+      reporterEmail: $reporterEmail
+      date: $date
+      time: $time
+    ) {
+      reporterName
+      reporterEmail
+      date
+      time
+    }
+  }
+`;
 
 const Form = () => {
   const [Name, setName] = useState("");
@@ -22,6 +53,13 @@ const Form = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [injuredPart, setInjuredPart] = useState<String[]>([]);
+
+  const { user } = useUser();
+  console.log(user?.email)
+
+  const [createReport, { loading, error }] = useMutation(CreateReportMutation, {
+    // onCompleted: () => reset(),
+  });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -100,7 +138,9 @@ const Form = () => {
             />
           </div>
         </div>
-        <h2 className="text-white text-xl font-semibold mb-4">Injury Details</h2>
+        <h2 className="mb-4 text-xl font-semibold text-white">
+          Injury Details
+        </h2>
         {injuredPart.map((data, index) => {
           return (
             <div className="mb-4">
