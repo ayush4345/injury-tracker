@@ -1,9 +1,7 @@
 import "~/styles/globals.css";
 import { Inter } from "next/font/google";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
 import Navbar from "~/components/navbar";
-import { ApolloProvider } from "@apollo/client";
-import apolloClient from "../lib/apollo";
+import { Providers } from "./providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,14 +21,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <ApolloProvider client={apolloClient}>
-        <UserProvider>
-          <body className={`font-sans ${inter.variable} bg-[#034144]`}>
-            <Navbar />
-            {children}
-          </body>
-        </UserProvider>
-      </ApolloProvider>
+      <body className={`font-sans ${inter.variable} bg-[#034144]`}>
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

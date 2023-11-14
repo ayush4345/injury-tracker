@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
 import Link from "next/link";
 import { FormNextLink } from "grommet-icons";
 import { gql, useQuery } from "@apollo/client";
 
 export default function HomePage() {
-  const AllLinksQuery = gql`
+  const AllReportsQuery = gql`
     query allReportsQuery($first: Int, $after: ID) {
       reports(first: $first, after: $after) {
         pageInfo {
@@ -17,16 +17,22 @@ export default function HomePage() {
           node {
             id
             reporterName
-            data
+            date
             time
             reporterEmail
-            injury
+            injury{
+              bodyPart
+              description
+            }
           }
+        }
       }
     }
   `;
 
-  const { data, loading, error, fetchMore } = useQuery(AllLinksQuery);
+  const { data, loading, error, fetchMore } = useQuery(AllReportsQuery,{
+    variables: { first: 3 },
+  });
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
