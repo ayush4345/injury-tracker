@@ -1,4 +1,5 @@
 import { builder } from "../builder";
+import prisma from "src/server/db";
 
 builder.prismaObject("Injury", {
   fields: (t) => ({
@@ -10,11 +11,8 @@ builder.prismaObject("Injury", {
 });
 
 builder.queryField("injuries", (t) =>
-
   t.prismaField({
-   
     type: ['Injury'],
-
     resolve: (query, _parent, _args, _ctx, _info) =>
       prisma.injury.findMany({ ...query })
   })

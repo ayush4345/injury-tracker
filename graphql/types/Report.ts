@@ -1,4 +1,5 @@
 import { builder } from "../builder";
+import prisma from "src/server/db";
 
 builder.prismaObject("Report", {
   fields: (t) => ({
