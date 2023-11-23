@@ -19,3 +19,30 @@ builder.queryField("injuries", (t) =>
       prisma.injury.findMany({ ...query }),
   }),
 );
+
+builder.mutationField("createInjury", (t) =>
+  t.prismaField({
+    type: 'Injury',
+    args: {
+      reportId: t.arg.int({ required: true }),
+      bodyPart: t.arg.string({ required: true }),
+      description: t.arg.string({ required: true }),
+    },
+    resolve: async (query, _parent, args, ctx) => {
+      const { reportId,bodyPart, description } = args
+
+      if (!(await ctx).user) {
+        throw new Error("You have to be logged in to perform this action")
+      }
+
+      return prisma.injury.create({
+        ...query,
+        data: {
+          reportId,
+          bodyPart,
+          description,
+        }
+      })
+    }
+  })
+)

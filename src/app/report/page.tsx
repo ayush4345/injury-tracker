@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import React, { InputHTMLAttributes, useState } from "react";
+import React, { InputHTMLAttributes, useEffect, useState } from "react";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -17,13 +17,10 @@ import { Textarea } from "~/components/ui/textarea";
 import toast, { Toaster } from "react-hot-toast";
 import { gql, useMutation } from "@apollo/client";
 import { useUser } from "@auth0/nextjs-auth0/client";
-
-type FormValues = {
-  reporterName: string;
-  reporterEmail: string;
-  date: string;
-  time: string;
-};
+import { useRouter } from "next/navigation";
+import { getSession } from "@auth0/nextjs-auth0";
+import InjuryInfo, { InputData } from "./injuryInfo";
+import { useQuery } from "@apollo/client";
 
 const CreateReportMutation = gql`
   mutation createReport(
@@ -46,44 +43,142 @@ const CreateReportMutation = gql`
   }
 `;
 
+const FetchReportData = gql`
+query GetReport($reportFilter: ReportFilterInput) {
+  reports(filter: $reportFilter) {
+    edges {
+      node {
+        id
+        reporterEmail
+        reporterName
+        time
+        date
+      }
+      cursor
+    }
+  }
+}
+`;
+
 const Form = () => {
-  const [Name, setName] = useState("");
+  const [reporterName, setReporterName] = useState("");
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [reporterEmail, setReporterEmail] = useState<
+    string | null | undefined
+  >();
+  const [description, setDescription] = useState<InputData[]>([]);
   const [injuredPart, setInjuredPart] = useState<String[]>([]);
 
-  const { user } = useUser();
-  console.log(user?.email)
+  const handleAddInput = (part: string) => {
+    const newInputData = {
+      part: part,
+      value: "",
+    };
 
-  const [createReport, { loading, error }] = useMutation(CreateReportMutation, {
-    // onCompleted: () => reset(),
+    setDescription((prevList) => [...prevList, newInputData]);
+  };
+
+  const handleRemoveInput = (part: string) => {
+    setDescription((prevList) =>
+      prevList.filter((input) => input.part !== part),
+    );
+  };
+
+  const handleInputChange = (part: string, value: string) => {
+    console.log(part, value);
+    setDescription((prevList) =>
+      prevList.map((input) =>
+        input.part === part ? { ...input, value } : input,
+      ),
+    );
+  };
+
+  console.log(description);
+
+  const { user } = useUser();
+
+  const router = useRouter();
+
+  useEffect(() => {
+    setReporterEmail(user?.email);
+  }, [user]);
+
+  const {
+    loading: fetchReportLoading,
+    error: reportFetchError,
+    data : reportData,
+    refetch,
+  } = useQuery(FetchReportData, {
+    variables: { 
+      reportFilter: {
+        reporterName: reporterName,
+        reporterEmail: reporterEmail,
+        date: date,
+        time: time,
+      },
+    },
+    skip: true, // Skip initial query execution
+    fetchPolicy: 'network-only', // Disable cache
   });
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [createReport, { loading, error }] = useMutation(CreateReportMutation, {
+    onCompleted: async () => {
+      const response  = await refetch()
+
+      console.log(response);
+    },
+  });
+
+  console.log(reporterEmail);
+  console.log(reportData);
+  console.log(reportFetchError)
+  console.log(fetchReportLoading)
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Form submitted:", { Name, date, email, phone });
+
+    if (!user) {
+      router.push("/api/auth/login");
+    } else {
+      const variables = { reporterName, reporterEmail, date, time };
+      // console.log("Form submitted:", { name, date, time, email });
+      try {
+        toast.promise(createReport({ variables }), {
+          loading: "Creating new report..",
+          success: "Report successfully created!🎉",
+          error: `Something went wrong 😥 Please try again -  ${error}`,
+        });
+
+        console.log(reportData);
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
   const showBodyPart = (side: string, e: string) => {
     console.log("Bodypart:", typeof e);
-    const newInjuredPart = [...injuredPart];
-    const index = newInjuredPart.findIndex((part) =>
-      part.includes(`${side} ${e}`),
+    const injury = [...description];
+    const index = injury.findIndex((data) =>
+      data.part.includes(`${side} ${e}`),
     );
     if (index !== -1) {
-      newInjuredPart.splice(index, 1);
-      setInjuredPart([...newInjuredPart]);
+      // injury.splice(index, 1);
+      // setDescription([...injury]);
+      handleRemoveInput(side + " " + e);
     } else {
-      setInjuredPart([...newInjuredPart, side + " " + e]);
+      handleAddInput(side + " " + e);
     }
   };
+
+  console.log(description);
 
   console.log("injuredPart:", injuredPart);
 
   return (
     <div className="flex justify-around">
+      <Toaster />
       <form onSubmit={handleSubmit} className="flex max-w-lg flex-col p-16">
         <div className="mb-4">
           <label
@@ -94,9 +189,9 @@ const Form = () => {
           </label>
           <Input
             type="text"
-            id="firstName"
-            value={Name}
-            onChange={(event) => setName(event.target.value)}
+            id="reporterName"
+            value={reporterName}
+            onChange={(event) => setReporterName(event.target.value)}
           />
         </div>
         <div className="mb-4">
@@ -141,22 +236,14 @@ const Form = () => {
         <h2 className="mb-4 text-xl font-semibold text-white">
           Injury Details
         </h2>
-        {injuredPart.map((data, index) => {
+        {description.map((data, index) => {
           return (
-            <div className="mb-4">
-              <label
-                htmlFor="phone"
-                className="mb-2 block font-semibold text-gray-100"
-              >
-                {data}
-              </label>
-              <Textarea
-                id="phone"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                // className="focus:shadow-outline w-full appearance-none rounded border px-3 py-2 leading-tight text-gray-100 shadow focus:outline-none"
-              />
-            </div>
+            <InjuryInfo
+              key={index}
+              data={data.part}
+              value={data.value}
+              onInputChange={handleInputChange}
+            />
           );
         })}
         <Button

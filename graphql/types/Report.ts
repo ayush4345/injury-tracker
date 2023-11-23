@@ -12,18 +12,43 @@ builder.prismaObject("Report", {
   }),
 });
 
+// Define a custom input type for the filter
+const filterType = builder.inputType("ReportFilterInput", {
+  fields: (t) => ({
+    reporterName: t.string(),
+    reporterEmail: t.string(),
+    date: t.string(),
+    time: t.string(),
+  }),
+});
+
 builder.queryField("reports", (t) =>
   t.prismaConnection({
     type: "Report",
     cursor: "id",
-    resolve: (query, _parent, _args, _ctx, _info) =>
-      prisma.report.findMany({ ...query }),
+    args: {
+      filter: t.arg({ type: filterType }),
+    },
+    resolve: async (query, _parent, args, _ctx, _info) => {
+      const { filter } = args;
+
+      const reports = await prisma.report.findMany({
+        ...query,
+        where: {
+          reporterEmail: filter?.reporterEmail ? { equals: filter?.reporterEmail } : undefined,
+          reporterName: filter?.reporterName ? { equals: filter?.reporterName } : undefined,
+          date: filter?.date ? { equals: filter?.date } : undefined,
+          time: filter?.time ? { equals: filter?.time } : undefined,
+        },
+      });
+      return reports;
+    },
   }),
 );
 
 builder.mutationField("createReport", (t) =>
   t.prismaField({
-    type: 'Report',
+    type: "Report",
     args: {
       reporterName: t.arg.string({ required: true }),
       reporterEmail: t.arg.string({ required: true }),
@@ -31,10 +56,10 @@ builder.mutationField("createReport", (t) =>
       time: t.arg.string({ required: true }),
     },
     resolve: async (query, _parent, args, ctx) => {
-      const { reporterName,reporterEmail, date, time } = args
+      const { reporterName, reporterEmail, date, time } = args;
 
       if (!(await ctx).user) {
-        throw new Error("You have to be logged in to perform this action")
+        throw new Error("You have to be logged in to perform this action");
       }
 
       return prisma.report.create({
@@ -44,8 +69,8 @@ builder.mutationField("createReport", (t) =>
           reporterEmail,
           date,
           time,
-        }
-      })
-    }
-  })
-)
+        },
+      });
+    },
+  }),
+);
