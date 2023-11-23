@@ -34,6 +34,8 @@ export default function HomePage() {
     variables: { first: 3 },
   });
 
+  console.log(data)
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
 
@@ -56,9 +58,9 @@ export default function HomePage() {
           </div>
           <Link
             href="/report"
-            className="flex w-44 gap-3 rounded-xl bg-white p-4 font-semibold text-[#034144] transition-all ease-in-out hover:gap-5"
+            className="flex w-48 gap-3 rounded-xl bg-white p-4 font-semibold text-[#034144] transition-all ease-in-out hover:gap-5"
           >
-            <span>Get Started</span>
+            <span>Report Incident</span>
             <FormNextLink />
           </Link>
         </div>

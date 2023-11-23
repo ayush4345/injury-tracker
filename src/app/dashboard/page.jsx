@@ -1,4 +1,5 @@
 "use client"
+import { useQuery } from "@apollo/client";
 
 import {
     Table,

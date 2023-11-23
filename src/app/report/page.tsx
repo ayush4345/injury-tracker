@@ -20,7 +20,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { useRouter } from "next/navigation";
 import { getSession } from "@auth0/nextjs-auth0";
 import InjuryInfo, { InputData } from "./injuryInfo";
-import { useQuery } from "@apollo/client";
+import { useQuery, useLazyQuery } from "@apollo/client";
 
 const CreateReportMutation = gql`
   mutation createReport(
@@ -43,21 +43,31 @@ const CreateReportMutation = gql`
   }
 `;
 
-const FetchReportData = gql`
-query GetReport($reportFilter: ReportFilterInput) {
-  reports(filter: $reportFilter) {
-    edges {
-      node {
-        id
-        reporterEmail
-        reporterName
-        time
-        date
-      }
-      cursor
+const CreateInjuryMutation = gql`
+  mutation createInjury($reportId: Int!, $part: String!, $value: String!) {
+    createInjury(reportId: $reportId, bodyPart: $part, description: $value) {
+      reportId
+      bodyPart
+      description
     }
   }
-}
+`;
+
+const FetchReportData = gql`
+  query GetReport($reportFilter: ReportFilterInput) {
+    reports(filter: $reportFilter) {
+      edges {
+        node {
+          id
+          reporterEmail
+          reporterName
+          time
+          date
+        }
+        cursor
+      }
+    }
+  }
 `;
 
 const Form = () => {
@@ -104,13 +114,16 @@ const Form = () => {
     setReporterEmail(user?.email);
   }, [user]);
 
-  const {
-    loading: fetchReportLoading,
-    error: reportFetchError,
-    data : reportData,
-    refetch,
-  } = useQuery(FetchReportData, {
-    variables: { 
+  const [
+    loadReport,
+    {
+      loading: fetchReportLoading,
+      error: reportFetchError,
+      data: reportData,
+      refetch,
+    },
+  ] = useLazyQuery(FetchReportData, {
+    variables: {
       reportFilter: {
         reporterName: reporterName,
         reporterEmail: reporterEmail,
@@ -118,22 +131,24 @@ const Form = () => {
         time: time,
       },
     },
-    skip: true, // Skip initial query execution
-    fetchPolicy: 'network-only', // Disable cache
+    onCompleted: (data) => handleInjurySubmit(data),
+    // skip: true, // Skip initial query execution
+    // fetchPolicy: "network-only", // Disable cache
   });
 
   const [createReport, { loading, error }] = useMutation(CreateReportMutation, {
-    onCompleted: async () => {
-      const response  = await refetch()
-
-      console.log(response);
-    },
+    onCompleted: () => loadReport(),
   });
 
+  const [createInjury, { loading: injuryLoading, error: injuryError }] =
+    useMutation(CreateInjuryMutation, {
+      // onCompleted: () => loadReport(),
+    });
+
   console.log(reporterEmail);
-  console.log(reportData);
-  console.log(reportFetchError)
-  console.log(fetchReportLoading)
+  console.log((reportData?.reports.edges[0].node.id));
+  console.log(reportFetchError);
+  console.log(fetchReportLoading);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -154,6 +169,30 @@ const Form = () => {
       } catch (error) {
         console.error(error);
       }
+    }
+  };
+
+  const handleInjurySubmit = async (data: any) => {
+    if (!user) {
+      router.push("/api/auth/login");
+    } else {
+      const reportId = parseInt(data.reports.edges[0].node.id);
+      console.log(data)
+      description.forEach((item) => {
+        let part = item.part;
+        let value = item.value;
+        const variables = { reportId, part, value };
+        console.log("Form submitted:", { reportId, part, value });
+        try {
+          toast.promise(createInjury({ variables }), {
+            loading: "Creating new injury..",
+            success: "Injury successfully added!🎉",
+            error: `Something went wrong 😥 Please try again -  ${error}`,
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      });
     }
   };
 
