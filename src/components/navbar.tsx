@@ -12,11 +12,11 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between bg-[#034144] p-4">
       <Link href="/">
-        <h1 className=" text-3xl font-semibold text-white">Lief</h1>
+        <h1 className=" text-xl font-semibold text-white">ReportGuard</h1>
       </Link>
       <ul className="flex list-none items-center">
         <li className="ml-4">
-          <a href="#" className="font-semibold text-white hover:underline">
+          <a href="/dashboard" className="font-semibold text-white hover:underline">
             Dashboard
           </a>
         </li>

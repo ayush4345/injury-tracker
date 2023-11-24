@@ -5,41 +5,41 @@ import { FormNextLink } from "grommet-icons";
 import { gql, useQuery } from "@apollo/client";
 
 export default function HomePage() {
-  const AllReportsQuery = gql`
-    query allReportsQuery($first: Int, $after: ID) {
-      reports(first: $first, after: $after) {
-        pageInfo {
-          endCursor
-          hasNextPage
-        }
-        edges {
-          cursor
-          node {
-            id
-            reporterName
-            date
-            time
-            reporterEmail
-            injury{
-              bodyPart
-              description
-            }
-          }
-        }
-      }
-    }
-  `;
+  // const AllReportsQuery = gql`
+  //   query allReportsQuery($first: Int, $after: ID) {
+  //     reports(first: $first, after: $after) {
+  //       pageInfo {
+  //         endCursor
+  //         hasNextPage
+  //       }
+  //       edges {
+  //         cursor
+  //         node {
+  //           id
+  //           reporterName
+  //           date
+  //           time
+  //           reporterEmail
+  //           injury{
+  //             bodyPart
+  //             description
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // `;
 
-  const { data, loading, error, fetchMore } = useQuery(AllReportsQuery,{
-    variables: { first: 3 },
-  });
+  // const { data, loading, error, fetchMore } = useQuery(AllReportsQuery,{
+  //   variables: { first: 3 },
+  // });
 
-  console.log(data)
+  // console.log(data)
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Oh no... {error.message}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Oh no... {error.message}</p>;
 
-  const { endCursor, hasNextPage } = data.reports.pageInfo;
+  // const { endCursor, hasNextPage } = data.reports.pageInfo;
 
   return (
     <main className="flex min-h-[90vh] flex-col items-center justify-center bg-[#034144] text-white">
