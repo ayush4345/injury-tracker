@@ -13,7 +13,6 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { FormNextLink } from "grommet-icons";
-import ReportCards from "./reportsCard";
 
 const FetchReportData = gql`
   query GetReport($reportFilter: ReportFilterInput) {
