@@ -12,7 +12,19 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { FormNextLink } from "grommet-icons";
+import { Injury, Report } from "@prisma/client";
 
 const FetchReportData = gql`
   query GetReport($reportFilter: ReportFilterInput) {
@@ -24,6 +36,11 @@ const FetchReportData = gql`
           reporterName
           time
           date
+          injury {
+            bodyPart
+            description
+            id
+          }
         }
         cursor
       }
@@ -53,7 +70,9 @@ export default function TableDemo() {
 
   return (
     <div className=" my-10">
-      <h1 className="text-center text-white text-3xl font-semibold mb-5">Dashboard</h1>
+      <h1 className="mb-5 text-center text-3xl font-semibold text-white">
+        Dashboard
+      </h1>
       <Table className="text-white">
         <TableCaption>A list of your reported incident.</TableCaption>
         <TableHeader>
@@ -66,17 +85,49 @@ export default function TableDemo() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data?.reports.edges.map((invoice: any) => {
-            let newDate = new Date(invoice.node.date);
+          {data?.reports.edges.map((report: any) => {
+            let newDate = new Date(report.node.date);
             let dateString = newDate.toDateString();
             return (
-              <TableRow key={invoice.node.id} className="hover:bg-green-100/10">
-                <TableCell className="font-medium">{invoice.node.id}</TableCell>
+              <TableRow key={report.node.id} className="hover:bg-green-100/10">
+                <TableCell className="font-medium">{report.node.id}</TableCell>
                 <TableCell>{dateString}</TableCell>
-                <TableCell>{invoice.node.time}</TableCell>
-                <TableCell>{invoice.node.reporterName}</TableCell>
-                <TableCell className=" flex cursor-pointer justify-center gap-1 text-center underline transition-all hover:gap-3">
-                  view <FormNextLink className=" fill-white stroke-white" />
+                <TableCell>{report.node.time}</TableCell>
+                <TableCell>{report.node.reporterName}</TableCell>
+                <TableCell className=" flex cursor-pointer justify-center text-center underline ">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <span className="flex gap-1 transition-all hover:gap-3">
+                        view <FormNextLink />
+                      </span>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-[#20425A] text-white">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Information</AlertDialogTitle>
+                        {report.node.injury.length > 0 ? (
+                          report.node.injury.map((data: Injury) => {
+                            return (
+                              <AlertDialogDescription className="mb-3">
+                                <strong className="text-md">Body Part</strong> : {data.bodyPart}
+                                <br />
+                                <strong className="text-md">Description📃</strong> : {data.description}
+                              </AlertDialogDescription>
+                            )
+                          })
+                        ) : (
+                          <AlertDialogDescription>
+                            no more Information
+                          </AlertDialogDescription>
+                        )}
+                        
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction className="bg-[#34485B] shadow-lg hover:bg-[#0a3d66]">
+                          Close
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             );
